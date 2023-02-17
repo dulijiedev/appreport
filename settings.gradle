@@ -1,0 +1,43 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+        maven { url "https://jitpack.io" }
+        maven {
+            url 'http://maven.roobo.com/nexus/content/repositories/releases'
+            allowInsecureProtocol(true)
+        }
+        maven {
+            url 'http://maven.roobo.com/nexus/content/repositories/snapshots'
+            allowInsecureProtocol(true)
+        }
+        maven {
+            url 'http://maven.365jiating.com/nexus/content/groups/com.roobo/'
+            allowInsecureProtocol(true)
+        }
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven { url "https://jitpack.io" }
+        maven {
+            url 'http://maven.roobo.com/nexus/content/repositories/releases'
+            allowInsecureProtocol(true)
+        }
+        maven {
+            url 'http://maven.roobo.com/nexus/content/repositories/snapshots'
+            allowInsecureProtocol(true)
+        }
+        maven {
+            url 'http://maven.365jiating.com/nexus/content/groups/com.roobo/'
+            allowInsecureProtocol(true)
+        }
+    }
+}
+rootProject.name = "AppReport"
+include ':reportlib'
+include ':myapplication'

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@color/white"
+    android:paddingStart="20dp"
+    android:paddingTop="20dp"
+    android:paddingEnd="20dp"
+    android:paddingBottom="20dp">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/tv_cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:text="取消"
+            android:textColor="@color/black"
+            android:textSize="15sp" />
+
+        <TextView
+            android:id="@+id/tv_confirm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:text="确定"
+            android:textColor="#17A2FB"
+            android:textSize="15sp" />
+
+
+    </FrameLayout>
+
+    <RadioGroup
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <RadioButton
+            android:id="@+id/tv_7"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="20dp"
+            android:button="@null"
+            android:gravity="center"
+            android:checked="true"
+            android:text="7天"
+            android:textColor="@color/select_data_color"
+            android:textSize="17sp" />
+
+        <RadioButton
+            android:id="@+id/tv_14"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:gravity="center"
+            android:button="@null"
+            android:text="14天"
+            android:textColor="@color/select_data_color"
+            android:textSize="17sp" />
+
+        <RadioButton
+            android:id="@+id/tv_30"
+            android:layout_width="match_parent"
+            android:button="@null"
+            android:layout_height="50dp"
+            android:gravity="center"
+            android:text="30天"
+            android:textColor="@color/select_data_color"
+            android:textSize="17sp" />
+
+    </RadioGroup>
+
+</LinearLayout>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="purple_200">#FFFFFFFF</color>
+    <color name="purple_500">#FFFFFFFF</color>
+    <color name="purple_700">#FFFFFFFF</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+<!--    <color name="column_color">#F2F1F3</color>-->
+    <color name="column_color">#F2F2F2</color>
+    <color name="bottom_line">#6E7078</color>
+    <color name="knowledget_one">#8cdb84</color>
+    <color name="knowledget_two">#E87666</color>
+    <color name="knowledget_three">#BBBBBB</color>
+
+
+    <color name="defaultTextColor">#FFFFFF</color>
+    <color name="errorColor">#D50000</color>
+    <color name="infoColor">#3F51B5</color>
+    <color name="successColor">#388E3C</color>
+    <color name="warningColor">#FFA900</color>
+    <color name="normalColor">#FFFFFF</color>
+    <color name="toast_progress_bg">#C4000000</color>
+
+    <color name="cf6">#f6f6f6</color>
+    <color name="transparent">#00000000</color>
+    <color name="master">#1bcb62</color>
+    <color name="weak">#FF6156</color>
+    <color name="undefine">#666666</color>
+</resources>

@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">AppDemo</string>
+    <string name="knowledge_1">1 准备课</string>
+    <string name="knowledge_2">2 位置</string>
+    <string name="knowledge_3">3 1~5的认识和加减法</string>
+    <string name="knowledge_4">4 认识图形(一)</string>
+    <string name="knowledge_5">5 6~10的认识和加减法</string>
+
+</resources>
