@@ -66,7 +66,6 @@ dependencies {
     api 'com.geyifeng.immersionbar:immersionbar:3.2.2'
     // kotlin扩展（可选）
     api 'com.geyifeng.immersionbar:immersionbar-ktx:3.2.2'
-    implementation 'com.android.support:multidex:1.0.3'
 }
 noArg {
     annotation("com.roobo.appreport.data.Poko")
