@@ -16,13 +16,10 @@ class SecondActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btn_jump).setOnClickListener {
             val intent = Intent(this,ReportMainActivity::class.java)
             intent.putExtra("lessonName","lessonName")
-
             intent.putExtra("subjectId",2)
             intent.putExtra("gradeId",151)
             intent.putExtra("editionId",59)
-//            intent.putExtra("deviceId","8027088")
             intent.putExtra("token","login_jxwdevice7994112qw1hq1lr0vfmrk7sz47jbvhekxeawbvq")
-
             startActivity(intent)
         }
 
