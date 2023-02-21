@@ -3,6 +3,7 @@ package com.roobo.appreport.api
 import android.app.Application
 import com.roobo.appreport.BuildConfig
 import com.roobo.appreport.networklibrary.base.INetworkRequiredInfo
+import com.roobo.appreport.networklibrary.sToken
 import getAppVersionCode
 import getAppVersionName
 
@@ -32,6 +33,6 @@ class NetworkRequestInfo(private val application: Application) : INetworkRequire
     }
 
     private fun getAuthorization(): String {
-       return ""
+       return sToken
     }
 }

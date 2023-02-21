@@ -12,11 +12,11 @@ class MainRepository {
 
 
     fun jxwLearnCaseStats(
-        deviceId: String = "8027088",
-        token: String
+//        deviceId: String = "8027088",
+//        token: String
     ): Observable<BaseResponse<DetailData>> {
         return CommonNetApi.sInstance.getService(ApiService::class.java, baseUrl)
-            .jxwLearnCaseStats(deviceId, token)
+            .jxwLearnCaseStats(/*deviceId, token*/)
     }
 
 
@@ -24,10 +24,10 @@ class MainRepository {
         subjectId: Int,
         gradeId: Int,
         editionId: Int,
-        deviceId: String,
-        token: String
+//        deviceId: String,
+//        token: String
     ): Observable<BaseResponse<TopData>> {
         return CommonNetApi.sInstance.getService(ApiService::class.java, baseUrl)
-            .jxwKnowledgeList(subjectId, gradeId, editionId, deviceId, token)
+            .jxwKnowledgeList(subjectId, gradeId, editionId, /*deviceId, token*/)
     }
 }

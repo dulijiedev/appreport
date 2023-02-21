@@ -12,7 +12,7 @@ class CommonRequestInterceptor(val requireInfo: INetworkRequiredInfo) : Intercep
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val builder: Request.Builder = chain.request().newBuilder()
-        builder.addHeader("Authorization", requireInfo.getToken())
+        builder.addHeader("token", requireInfo.getToken())
         return chain.proceed(builder.build())
     }
 

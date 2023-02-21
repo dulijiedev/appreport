@@ -12,6 +12,7 @@ class SecondActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_second)
+        ReportSDK.getInstance().init(application,"http://api4.jiumentongbu.com/api/")
         findViewById<Button>(R.id.btn_jump).setOnClickListener {
             val intent = Intent(this,ReportMainActivity::class.java)
             intent.putExtra("lessonName","lessonName")
@@ -19,11 +20,11 @@ class SecondActivity : AppCompatActivity() {
             intent.putExtra("subjectId",2)
             intent.putExtra("gradeId",151)
             intent.putExtra("editionId",59)
-            intent.putExtra("deviceId","8027088")
-            intent.putExtra("token","login_user1298584dzogsesr4df1yg8cr1xc7wrv8j2sv1nz")
+//            intent.putExtra("deviceId","8027088")
+            intent.putExtra("token","login_jxwdevice7994112qw1hq1lr0vfmrk7sz47jbvhekxeawbvq")
 
             startActivity(intent)
         }
-        ReportSDK.getInstance().init(application,"http://api4.jiumentongbu.com/api/")
+
     }
 }

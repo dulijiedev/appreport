@@ -69,7 +69,7 @@ class ReportMainActivity : AppCompatActivity() {
         sSubjectId = intent.getIntExtra("subjectId",-1)
         sGradeId = intent.getIntExtra("gradeId",-1)
         sEditionId = intent.getIntExtra("editionId",-1)
-        sDeviceId = intent.getStringExtra("deviceId") ?: ""
+//        sDeviceId = intent.getStringExtra("deviceId") ?: ""
         sToken = intent.getStringExtra("token") ?: ""
 
         initBar()
@@ -961,8 +961,8 @@ class ReportMainActivity : AppCompatActivity() {
     private val mMainRepository = MainRepository()
     private fun getDataRemote() {
         mMainRepository.jxwLearnCaseStats(
-            deviceId = sDeviceId,
-            token = sToken
+//            deviceId = sDeviceId,
+//            token = sToken
         ).subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(object : Observer<BaseResponse<DetailData>> {
@@ -971,11 +971,14 @@ class ReportMainActivity : AppCompatActivity() {
                 }
 
                 override fun onNext(it: BaseResponse<DetailData>) {
-                    this@ReportMainActivity.detailData = detailData
+                    this@ReportMainActivity.detailData = it.data
                     setData(mBinding.chart, TopCharEnum.Duration, it.data, 7)
                 }
 
                 override fun onError(e: Throwable) {
+                    e.printStackTrace()
+                    print("ddd ${e.message}")
+                    Log.e("ddd","${e.message}")
                 }
 
                 override fun onComplete() {
@@ -989,8 +992,8 @@ class ReportMainActivity : AppCompatActivity() {
             subjectId = sSubjectId,
             gradeId = sGradeId,
             editionId = sEditionId,
-            deviceId = sDeviceId,
-            token = sToken
+//            deviceId = sDeviceId,
+//            token = sToken
         ).subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(object : Observer<BaseResponse<TopData>> {
@@ -1025,6 +1028,9 @@ class ReportMainActivity : AppCompatActivity() {
                 }
 
                 override fun onError(e: Throwable) {
+                    e.printStackTrace()
+                    print("ddd ${e.message}")
+                    Log.e("ddd","${e.message}")
                 }
 
                 override fun onComplete() {
