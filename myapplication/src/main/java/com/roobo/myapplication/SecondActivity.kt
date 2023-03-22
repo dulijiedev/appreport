@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
 import com.roobo.appreport.ReportMainActivity
+import com.roobo.appreport.ReportTabActivity
 
 import android.content.Intent
 import com.roobo.appreport.ReportSDK
@@ -14,7 +15,8 @@ class SecondActivity : AppCompatActivity() {
         setContentView(R.layout.activity_second)
         ReportSDK.getInstance().init(application,"http://api4.jiumentongbu.com/api/")
         findViewById<Button>(R.id.btn_jump).setOnClickListener {
-            val intent = Intent(this,ReportMainActivity::class.java)
+//            val intent = Intent(this,ReportMainActivity::class.java)
+            val intent = Intent(this,ReportTabActivity::class.java)
             intent.putExtra("lessonName","lessonName")
             intent.putExtra("subjectId",2)
             intent.putExtra("gradeId",151)

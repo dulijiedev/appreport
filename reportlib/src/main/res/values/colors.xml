@@ -28,4 +28,5 @@
     <color name="master">#1bcb62</color>
     <color name="weak">#FF6156</color>
     <color name="undefine">#666666</color>
+    <color name="tab_indicator_color">#0000FF</color>
 </resources>
