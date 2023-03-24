@@ -15,10 +15,7 @@ class SecondActivity : AppCompatActivity() {
         setContentView(R.layout.activity_second)
         ReportSDK.getInstance().init(application,"http://api4.jiumentongbu.com/api/")
         findViewById<Button>(R.id.btn_jump).setOnClickListener {
-//            val intent = Intent(this,ReportMainActivity::class.java)
             val intent = Intent(this,ReportTabActivity::class.java)
-            intent.putExtra("lessonName","lessonName")
-            intent.putExtra("subjectId",2)
             intent.putExtra("gradeId",151)
             intent.putExtra("editionId",59)
             intent.putExtra("token","login_jxwdevice89781539p7oqab7d7ybnbh8us2xl9huyiev59qm")

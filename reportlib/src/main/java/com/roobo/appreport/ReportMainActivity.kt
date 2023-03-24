@@ -386,7 +386,7 @@ class ReportMainActivity : AppCompatActivity() {
             xAxis.enableGridDashedLine(10f, 10f, 0f)
 
 
-            val custom = ScoreAxisValueFormat()
+            val custom = ScoreAxisValueFormat(true)
 
             val leftAxis: YAxis = lineChart.axisLeft
             leftAxis.setLabelCount(6, false)
@@ -470,7 +470,7 @@ class ReportMainActivity : AppCompatActivity() {
         xAxis.valueFormatter = xAxisFormatter
         xAxis.axisLineColor = UIUtils.getColor(R.color.bottom_line)
 
-        val custom = ScoreAxisValueFormat()
+        val custom = ScoreAxisValueFormat(true)
 
         val leftAxis: YAxis = chart.axisLeft
         leftAxis.setLabelCount(leftCount, false)

@@ -112,8 +112,8 @@ class CourseFragment : Fragment() {
         mBinding.apply {
             tvTips.text = subjectInfo?.subjectname?:""
             initSevenChart()
-            initStudyChart(chart, leftCount = 3)
-            initLineChart()
+            initStudyChart(true,chart, leftCount = 3)
+            initLineChart(true)
             initKnowledge()
             initTipKnowledge()
 
@@ -132,18 +132,26 @@ class CourseFragment : Fragment() {
 
             llTime.setOnClickListener {
                 switchTopChartBkgAndData(TopCharEnum.Duration)
+                initLineChart(true)
+                initStudyChart(true,chart, leftCount = 3)
                 setData(chart, TopCharEnum.Duration, detailData, 7)
             }
             llStudyCount.setOnClickListener {
                 switchTopChartBkgAndData(TopCharEnum.KnowledgePoints)
+                initLineChart(false)
+                initStudyChart(false,chart, leftCount = 3)
                 setData(chart, TopCharEnum.KnowledgePoints, detailData, 7)
             }
             llVideo.setOnClickListener {
                 switchTopChartBkgAndData(TopCharEnum.WatchVideo)
+                initLineChart(false)
+                initStudyChart(false,chart, leftCount = 3)
                 setData(chart, TopCharEnum.WatchVideo, detailData, 7)
             }
             llAnswer.setOnClickListener {
                 switchTopChartBkgAndData(TopCharEnum.AnswerQuestion)
+                initLineChart(false)
+                initStudyChart(false,chart, leftCount = 3)
                 setData(chart, TopCharEnum.AnswerQuestion, detailData, 7)
             }
 
@@ -161,8 +169,9 @@ class CourseFragment : Fragment() {
             }
 
             llChangeData.setOnClickListener {
-                val dialog = BottomSheetDialog(requireContext())
-                val view = LayoutInflater.from(requireContext())
+                val context =context?:return@setOnClickListener
+                val dialog = BottomSheetDialog(context)
+                val view = LayoutInflater.from(context)
                     .inflate(R.layout.choose_data_layout, null, false)
                 dialog.setContentView(view)
                 val radioBtm7 = view.findViewById<RadioButton>(R.id.tv_7)
@@ -190,7 +199,7 @@ class CourseFragment : Fragment() {
                         currentTopSize = 14
                         lineChart.isVisible = true
                         chart.isVisible = false
-                        initLineChart()
+                        initLineChart(true)
                         setLineCharData(TopCharEnum.Duration, detailData, 14)
                         llTime.performClick()
                     } else if (radioBtm30.isChecked) {
@@ -198,7 +207,7 @@ class CourseFragment : Fragment() {
                         lineChart.isVisible = true
                         chart.isVisible = false
                         setLineCharData(TopCharEnum.Duration, detailData, 30)
-                        initLineChart()
+                        initLineChart(true)
                         llTime.performClick()
                     }
                     tvDate.text = "${currentTopSize}天内"
@@ -391,7 +400,7 @@ class CourseFragment : Fragment() {
         }
     }
 
-    private fun initLineChart() {
+    private fun initLineChart(hasScore:Boolean = true) {
         mBinding.apply {
 
             // background color
@@ -419,7 +428,7 @@ class CourseFragment : Fragment() {
             xAxis.enableGridDashedLine(10f, 10f, 0f)
 
 
-            val custom = ScoreAxisValueFormat()
+            val custom = ScoreAxisValueFormat(hasScore)
 
             val leftAxis: YAxis = lineChart.axisLeft
             leftAxis.setLabelCount(6, false)
@@ -451,7 +460,7 @@ class CourseFragment : Fragment() {
     /**
      * 初始化学习情况图表
      */
-    private fun initStudyChart(chart: BarChart, leftCount: Int = 2) {
+    private fun initStudyChart(hasScore: Boolean,chart: BarChart, leftCount: Int = 2) {
 
         chart.setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
             private val onValueSelectedRectF = RectF()
@@ -503,7 +512,7 @@ class CourseFragment : Fragment() {
         xAxis.valueFormatter = xAxisFormatter
         xAxis.axisLineColor = UIUtils.getColor(R.color.bottom_line)
 
-        val custom = ScoreAxisValueFormat()
+        val custom = ScoreAxisValueFormat(hasScore)
 
         val leftAxis: YAxis = chart.axisLeft
         leftAxis.setLabelCount(leftCount, false)
@@ -625,13 +634,17 @@ class CourseFragment : Fragment() {
         chart.setExtraOffsets(0f, 0f, 0f, 0f)
 
 
-        mv = XYMarkerView(requireContext(), xAxisFormatter)
-        mv?.chartView = chart // For bounds control
-        chart.marker = mv // Set the marker to the chart
+        context?.let{
+            mv = XYMarkerView(it, xAxisFormatter)
+            mv?.chartView = chart // For bounds control
+            chart.marker = mv // Set the marker to the chart
+        }
+
     }
 
 
     private fun setData(chart: BarChart, type: TopCharEnum, data: DetailData?, count: Int) {
+        val context = context?:return
         val values = mutableListOf<BarEntry>()
         val weekData = data?.weekDetail
         val monthData = data?.monthDetail
@@ -671,7 +684,7 @@ class CourseFragment : Fragment() {
                         BarEntry(
                             i.toFloat(),
                             timeList[i].toFloat(),
-                            ContextCompat.getDrawable(requireContext(), R.mipmap.star)
+                            ContextCompat.getDrawable(context, R.mipmap.star)
                         )
                     )
                 }
@@ -683,7 +696,7 @@ class CourseFragment : Fragment() {
                         BarEntry(
                             i.toFloat(),
                             knowledgeList[i].toFloat(),
-                            ContextCompat.getDrawable(requireContext(), R.mipmap.star)
+                            ContextCompat.getDrawable(context, R.mipmap.star)
                         )
                     )
                 }
@@ -694,7 +707,7 @@ class CourseFragment : Fragment() {
                         BarEntry(
                             i.toFloat(),
                             videoList[i].toFloat(),
-                            ContextCompat.getDrawable(requireContext(), R.mipmap.star)
+                            ContextCompat.getDrawable(context, R.mipmap.star)
                         )
                     )
                 }
@@ -705,7 +718,7 @@ class CourseFragment : Fragment() {
                         BarEntry(
                             i.toFloat(),
                             questionList[i].toFloat(),
-                            ContextCompat.getDrawable(requireContext(), R.mipmap.star)
+                            ContextCompat.getDrawable(context, R.mipmap.star)
                         )
                     )
                 }
@@ -728,7 +741,7 @@ class CourseFragment : Fragment() {
             set1.barShadowColor = UIUtils.getColor(R.color.column_color)
 
             val startColor =
-                ContextCompat.getColor(requireContext(), android.R.color.holo_blue_light)
+                ContextCompat.getColor(context, android.R.color.holo_blue_light)
             set1.color = startColor
 
             val dataSets = ArrayList<IBarDataSet>()
@@ -751,6 +764,7 @@ class CourseFragment : Fragment() {
         topData: TopData,
         knowledgeType: KnowledgeCharEnum = KnowledgeCharEnum.All
     ) {
+        val context = context?:return
         val values = mutableListOf<BarEntry>()
         chart.clear()
         for (i in topData.chapterList.indices) {
@@ -764,7 +778,7 @@ class CourseFragment : Fragment() {
                     values.add(
                         BarEntry(
                             i.toFloat(), floatArrayOf(val1, val2, val3),
-                            ContextCompat.getDrawable(requireContext(), R.mipmap.star)
+                            ContextCompat.getDrawable(context, R.mipmap.star)
                         )
                     )
                 }
@@ -772,7 +786,7 @@ class CourseFragment : Fragment() {
                     values.add(
                         BarEntry(
                             i.toFloat(), floatArrayOf(val1),
-                            ContextCompat.getDrawable(requireContext(), R.mipmap.star)
+                            ContextCompat.getDrawable(context, R.mipmap.star)
                         )
                     )
                 }
@@ -780,7 +794,7 @@ class CourseFragment : Fragment() {
                     values.add(
                         BarEntry(
                             i.toFloat(), floatArrayOf(val2),
-                            ContextCompat.getDrawable(requireContext(), R.mipmap.star)
+                            ContextCompat.getDrawable(context, R.mipmap.star)
                         )
                     )
                 }
@@ -788,7 +802,7 @@ class CourseFragment : Fragment() {
                     values.add(
                         BarEntry(
                             i.toFloat(), floatArrayOf(val3),
-                            ContextCompat.getDrawable(requireContext(), R.mipmap.star)
+                            ContextCompat.getDrawable(context, R.mipmap.star)
                         )
                     )
                 }
@@ -847,6 +861,7 @@ class CourseFragment : Fragment() {
 
 
     private fun setLineCharData(type: TopCharEnum, data: DetailData?, count: Int) {
+        val context = context?:return
         val values = mutableListOf<Entry>()
         val weekData = data?.weekDetail
         val monthData = data?.monthDetail
@@ -890,7 +905,7 @@ class CourseFragment : Fragment() {
                         BarEntry(
                             i.toFloat(),
                             timeList[i].toFloat(),
-                            ContextCompat.getDrawable(requireContext(), R.mipmap.star)
+                            ContextCompat.getDrawable(context, R.mipmap.star)
                         )
                     )
                 }
@@ -902,7 +917,7 @@ class CourseFragment : Fragment() {
                         BarEntry(
                             i.toFloat(),
                             knowledgeList[i].toFloat(),
-                            ContextCompat.getDrawable(requireContext(), R.mipmap.star)
+                            ContextCompat.getDrawable(context, R.mipmap.star)
                         )
                     )
                 }
@@ -913,7 +928,7 @@ class CourseFragment : Fragment() {
                         BarEntry(
                             i.toFloat(),
                             videoList[i].toFloat(),
-                            ContextCompat.getDrawable(requireContext(), R.mipmap.star)
+                            ContextCompat.getDrawable(context, R.mipmap.star)
                         )
                     )
                 }
@@ -924,7 +939,7 @@ class CourseFragment : Fragment() {
                         BarEntry(
                             i.toFloat(),
                             questionList[i].toFloat(),
-                            ContextCompat.getDrawable(requireContext(), R.mipmap.star)
+                            ContextCompat.getDrawable(context, R.mipmap.star)
                         )
                     )
                 }
@@ -1034,7 +1049,9 @@ class CourseFragment : Fragment() {
                 override fun onNext(it: BaseResponse<TopData>) {
                     Log.e("ddd", " KnowData ${it.msg} ${it.code}")
                     if(it.code!=0){
-                        Toast.makeText(requireContext(),it.msg?:"",Toast.LENGTH_SHORT).show()
+                        context?.apply {
+                            Toast.makeText(this,it.msg?:"",Toast.LENGTH_SHORT).show()
+                        }
                         return
                     }
                     this@CourseFragment.topData = it.data
@@ -1077,9 +1094,11 @@ class CourseFragment : Fragment() {
 
     private val adapter = TipAdapter()
     private fun initTipKnowledge() {
+
         mBinding.apply {
+            val context = context?:return
             listTip.layoutManager =
-                LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+                LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
             listTip.adapter = adapter
         }
     }
@@ -1097,7 +1116,8 @@ class CourseFragment : Fragment() {
 
     private fun initHolder() {
         mBinding.apply {
-            listHolder.layoutManager = LinearLayoutManager(requireContext())
+            val context = context?:return
+            listHolder.layoutManager = LinearLayoutManager(context)
             listHolder.adapter = mHolderAdapter
             listHolder.setNestedScrollingEnabled(false);
             listHolder.setHasFixedSize(true)
