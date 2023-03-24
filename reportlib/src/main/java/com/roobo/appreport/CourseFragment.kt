@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.RadioButton
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
@@ -31,10 +32,7 @@ import com.github.mikephil.charting.utils.MPPointF
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.roobo.appreport.adapter.HolderAdapter
 import com.roobo.appreport.adapter.TipAdapter
-import com.roobo.appreport.data.DetailData
-import com.roobo.appreport.data.KnowledgeCharEnum
-import com.roobo.appreport.data.TopCharEnum
-import com.roobo.appreport.data.TopData
+import com.roobo.appreport.data.*
 import com.roobo.appreport.databinding.FragmentCourseBinding
 import com.roobo.appreport.formatter.*
 import com.roobo.appreport.networklibrary.*
@@ -61,14 +59,14 @@ class CourseFragment : Fragment() {
 
     private var mv: XYMarkerView? = null
 
-    private var lessonName: String? = ""
+    private var subjectInfo: SubjectInfo? = null
 
     private val mMainRepository = MainRepository()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            lessonName = it.getString(ARG_LESSONNAME)
+            subjectInfo = it.getParcelable<SubjectInfo>(ARG_LESSONNAME)
         }
     }
 
@@ -100,10 +98,10 @@ class CourseFragment : Fragment() {
         private const val ARG_TOKEN = "token"
          */
         @JvmStatic
-        fun newInstance(lessonName: String) =
+        fun newInstance(subjectInfo: SubjectInfo) =
             CourseFragment().apply {
                 arguments = Bundle().apply {
-                    putString(ARG_LESSONNAME, lessonName)
+                    putParcelable(ARG_LESSONNAME, subjectInfo)
                 }
             }
     }
@@ -112,7 +110,7 @@ class CourseFragment : Fragment() {
     private fun initViews() {
         initHolder()
         mBinding.apply {
-            tvTips.text = lessonName
+            tvTips.text = subjectInfo?.subjectname?:""
             initSevenChart()
             initStudyChart(chart, leftCount = 3)
             initLineChart()
@@ -1002,6 +1000,7 @@ class CourseFragment : Fragment() {
                 }
 
                 override fun onNext(it: BaseResponse<DetailData>) {
+                    Log.e("ddd", "${it.msg} ${it.code}")
                     this@CourseFragment.detailData = it.data
                     setData(mBinding.chart, TopCharEnum.Duration, it.data, 7)
                 }
@@ -1020,7 +1019,7 @@ class CourseFragment : Fragment() {
 
     private fun getKnowDataRemote() {
         mMainRepository.jxwKnowledgeList(
-            subjectId = sSubjectId,
+            subjectId = subjectInfo?.subjectid?: sSubjectId,
             gradeId = sGradeId,
             editionId = sEditionId,
 //            deviceId = sDeviceId,
@@ -1033,6 +1032,11 @@ class CourseFragment : Fragment() {
                 }
 
                 override fun onNext(it: BaseResponse<TopData>) {
+                    Log.e("ddd", " KnowData ${it.msg} ${it.code}")
+                    if(it.code!=0){
+                        Toast.makeText(requireContext(),it.msg?:"",Toast.LENGTH_SHORT).show()
+                        return
+                    }
                     this@CourseFragment.topData = it.data
                     mBinding.tvTotalKnowledge.text = "${it.data?.totalBookKnowledge?:"-"}"
                     mBinding.tvMasterNumber.text = "${it.data?.bookMasterNum?:"-"}"

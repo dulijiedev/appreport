@@ -2,6 +2,7 @@ package com.roobo.appreport
 
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
@@ -10,6 +11,8 @@ import com.gyf.immersionbar.BarHide
 import com.gyf.immersionbar.ImmersionBar
 import com.roobo.appreport.adapter.TabFragAdapter
 import com.roobo.appreport.data.DetailData
+import com.roobo.appreport.data.SubjectInfo
+import com.roobo.appreport.data.TopData
 import com.roobo.appreport.databinding.ActivityReportTabBinding
 import com.roobo.appreport.networklibrary.base.BaseResponse
 import com.roobo.appreport.networklibrary.sEditionId
@@ -32,9 +35,9 @@ class ReportTabActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_report_tab)
 
-        sSubjectId = intent.getIntExtra("subjectId",-1)
-        sGradeId = intent.getIntExtra("gradeId",-1)
-        sEditionId = intent.getIntExtra("editionId",-1)
+        sSubjectId = intent.getIntExtra("subjectId", -1)
+        sGradeId = intent.getIntExtra("gradeId", -1)
+        sEditionId = intent.getIntExtra("editionId", -1)
 //        sDeviceId = intent.getStringExtra("deviceId") ?: ""
         sToken = intent.getStringExtra("token") ?: ""
 
@@ -45,22 +48,30 @@ class ReportTabActivity : AppCompatActivity() {
             }
 
         }
-        getDataRemote()
+        getTabs()
     }
 
     private val mMainRepository = MainRepository()
 
-    private fun getDataRemote() {
-        mMainRepository.jxwLearnCaseStats().subscribeOn(Schedulers.io())
+    /**
+     * 获取tab
+     */
+    private fun getTabs() {
+        mMainRepository.jxwSubjectList()
+            .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(object : Observer<BaseResponse<DetailData>> {
+            .subscribe(object : Observer<BaseResponse<List<SubjectInfo>>> {
                 override fun onSubscribe(d: Disposable) {
 
                 }
 
-                override fun onNext(it: BaseResponse<DetailData>) {
-
-
+                override fun onNext(it: BaseResponse<List<SubjectInfo>>) {
+                    Log.e("ddd a", "${it.msg } ${it.code}")
+                    if(it.code == 0) {
+                        it.data?.let { it1 -> initTabAndDatas(it1) }
+                    }else{
+                        Toast.makeText(this@ReportTabActivity,it.msg?:"",Toast.LENGTH_SHORT).show()
+                    }
                 }
 
                 override fun onError(e: Throwable) {
@@ -69,15 +80,13 @@ class ReportTabActivity : AppCompatActivity() {
                 }
 
                 override fun onComplete() {
+
                 }
 
             })
-
-
-        initTabAndDatas(mutableListOf("语文", "数学", "英语", "历史", "地理", "生物", "化学"))
     }
 
-    private fun initTabAndDatas(list: MutableList<String>) {
+    private fun initTabAndDatas(list: List<SubjectInfo>) {
         list.forEach {
             val frag = CourseFragment.newInstance(it)
             fragments.add(frag)
@@ -89,7 +98,7 @@ class ReportTabActivity : AppCompatActivity() {
             mBinding.tabLayout, mBinding.viewPager, true, true
         ) { tab, position ->
             Log.e("dlj", "$tab $position ")
-            tab.text = list[position]
+            tab.text = list[position].subjectname?:""
         }.attach()
     }
 

@@ -21,7 +21,7 @@ class SecondActivity : AppCompatActivity() {
             intent.putExtra("subjectId",2)
             intent.putExtra("gradeId",151)
             intent.putExtra("editionId",59)
-            intent.putExtra("token","login_jxwdevice7994112qw1hq1lr0vfmrk7sz47jbvhekxeawbvq")
+            intent.putExtra("token","login_jxwdevice89781539p7oqab7d7ybnbh8us2xl9huyiev59qm")
             startActivity(intent)
         }
 

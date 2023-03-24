@@ -90,3 +90,12 @@ data class WeekDetail(
     val usedTime: Int,
     val videoNum: Int
 ) : Parcelable
+
+@Poko
+@Parcelize
+data class SubjectInfo(
+    val subjectid:Int,
+    val subjectname:String,
+    val pinyin:String?,
+    val opentype:Int
+) : Parcelable

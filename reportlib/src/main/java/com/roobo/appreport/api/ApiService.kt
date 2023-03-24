@@ -1,6 +1,7 @@
 package com.roobo.appreport.api
 
 import com.roobo.appreport.data.DetailData
+import com.roobo.appreport.data.SubjectInfo
 import com.roobo.appreport.data.TopData
 import com.roobo.appreport.networklibrary.base.BaseResponse
 import io.reactivex.Observable
@@ -25,5 +26,10 @@ interface ApiService {
 //        @Query("deviceId") deviceId: String,
 //        @Query("token") token: String
     ): Observable<BaseResponse<TopData>>
+
+    @GET("jxwtiku/subject/list")
+    fun jxwSubjectList(
+        @Query("openType") subjectId: Int
+    ): Observable<BaseResponse<List<SubjectInfo>>>
 
 }
