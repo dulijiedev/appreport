@@ -1,8 +1,10 @@
 package com.roobo.appreport
 
+import android.database.Cursor
 import android.graphics.Color
 import android.graphics.DashPathEffect
 import android.graphics.RectF
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -30,22 +32,23 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.gyf.immersionbar.BarHide
 import com.gyf.immersionbar.ImmersionBar
 import com.roobo.appreport.adapter.HolderAdapter
+import com.roobo.appreport.adapter.SubjectAdapter
 import com.roobo.appreport.adapter.TipAdapter
-import com.roobo.appreport.data.DetailData
-import com.roobo.appreport.data.KnowledgeCharEnum
-import com.roobo.appreport.data.TopCharEnum
-import com.roobo.appreport.data.TopData
+import com.roobo.appreport.data.*
 import com.roobo.appreport.databinding.ActivityMainReportBinding
+import com.roobo.appreport.databinding.SwitchCourseLayoutBinding
 import com.roobo.appreport.formatter.*
-import com.roobo.appreport.networklibrary.*
 import com.roobo.appreport.networklibrary.base.BaseResponse
+import com.roobo.appreport.networklibrary.sEditionId
+import com.roobo.appreport.networklibrary.sGradeId
+import com.roobo.appreport.networklibrary.sToken
 import com.roobo.appreport.repository.MainRepository
 import com.roobo.appreport.utils.UIUtils
+import io.reactivex.Observable
 import io.reactivex.Observer
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
-import retrofit2.http.Query
 
 class ReportMainActivity : AppCompatActivity() {
     private lateinit var mBinding: ActivityMainReportBinding
@@ -58,33 +61,32 @@ class ReportMainActivity : AppCompatActivity() {
     private var detailData: DetailData? = null
 
     private var mv: XYMarkerView? = null
+    private val lessonList = mutableListOf<LastSelectEntity>()
 
-    private var lessonName: String? = ""
+    private var currentSelectEntity: LastSelectEntity? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main_report)
-        lessonName = intent.getStringExtra("lessonName") ?: ""
-
-        sSubjectId = intent.getIntExtra("subjectId",-1)
-        sGradeId = intent.getIntExtra("gradeId",-1)
-        sEditionId = intent.getIntExtra("editionId",-1)
-//        sDeviceId = intent.getStringExtra("deviceId") ?: ""
+        sGradeId = intent.getIntExtra("gradeId", -1)
+        sEditionId = intent.getIntExtra("editionId", -1)
         sToken = intent.getStringExtra("token") ?: ""
 
         initBar()
         initHolder()
         mBinding.apply {
-            tvTips.text = lessonName
             ivBack.setOnClickListener {
                 finish()
             }
             initSevenChart()
-            initStudyChart(chart, leftCount = 3)
-            initLineChart()
+            initStudyChart(true, chart, leftCount = 3)
+            initLineChart(true)
             initKnowledge()
             initTipKnowledge()
-
+            ivSwitch.setOnClickListener {
+//                showSwitchDialog()
+                showSwitchDialog(lessonList)
+            }
 
             chart.isVisible = visible7
             lineChart.isVisible = !visible7
@@ -100,18 +102,26 @@ class ReportMainActivity : AppCompatActivity() {
 
             llTime.setOnClickListener {
                 switchTopChartBkgAndData(TopCharEnum.Duration)
+                initLineChart(true)
+                initStudyChart(true, chart, leftCount = 3)
                 setData(chart, TopCharEnum.Duration, detailData, 7)
             }
             llStudyCount.setOnClickListener {
                 switchTopChartBkgAndData(TopCharEnum.KnowledgePoints)
+                initLineChart(false)
+                initStudyChart(false, chart, leftCount = 3)
                 setData(chart, TopCharEnum.KnowledgePoints, detailData, 7)
             }
             llVideo.setOnClickListener {
                 switchTopChartBkgAndData(TopCharEnum.WatchVideo)
+                initLineChart(false)
+                initStudyChart(false, chart, leftCount = 3)
                 setData(chart, TopCharEnum.WatchVideo, detailData, 7)
             }
             llAnswer.setOnClickListener {
                 switchTopChartBkgAndData(TopCharEnum.AnswerQuestion)
+                initLineChart(false)
+                initStudyChart(false, chart, leftCount = 3)
                 setData(chart, TopCharEnum.AnswerQuestion, detailData, 7)
             }
 
@@ -147,18 +157,17 @@ class ReportMainActivity : AppCompatActivity() {
                     dialog.dismiss()
                 }
                 view.findViewById<TextView>(R.id.tv_confirm).setOnClickListener {
+                    initLineChart(true)
                     if (radioBtm7.isChecked) {
                         lineChart.isVisible = false
                         chart.isVisible = true
                         currentTopSize = 7
-
                         setData(chart, TopCharEnum.Duration, detailData, 7)
                         llTime.performClick()
                     } else if (radioBtm14.isChecked) {
                         currentTopSize = 14
                         lineChart.isVisible = true
                         chart.isVisible = false
-                        initLineChart()
                         setLineCharData(TopCharEnum.Duration, detailData, 14)
                         llTime.performClick()
                     } else if (radioBtm30.isChecked) {
@@ -166,7 +175,6 @@ class ReportMainActivity : AppCompatActivity() {
                         lineChart.isVisible = true
                         chart.isVisible = false
                         setLineCharData(TopCharEnum.Duration, detailData, 30)
-                        initLineChart()
                         llTime.performClick()
                     }
                     tvDate.text = "${currentTopSize}天内"
@@ -177,7 +185,8 @@ class ReportMainActivity : AppCompatActivity() {
         }
 
         getDataRemote()
-        getKnowDataRemote()
+        getSelectLesson()
+        getAllContent()
     }
 
     private fun initSevenChart() {
@@ -358,7 +367,7 @@ class ReportMainActivity : AppCompatActivity() {
         }
     }
 
-    private fun initLineChart() {
+    private fun initLineChart(hasScore: Boolean = true) {
         mBinding.apply {
 
             // background color
@@ -386,7 +395,7 @@ class ReportMainActivity : AppCompatActivity() {
             xAxis.enableGridDashedLine(10f, 10f, 0f)
 
 
-            val custom = ScoreAxisValueFormat(true)
+            val custom = ScoreAxisValueFormat(hasScore)
 
             val leftAxis: YAxis = lineChart.axisLeft
             leftAxis.setLabelCount(6, false)
@@ -418,7 +427,7 @@ class ReportMainActivity : AppCompatActivity() {
     /**
      * 初始化学习情况图表
      */
-    private fun initStudyChart(chart: BarChart, leftCount: Int = 2) {
+    private fun initStudyChart(hasScore: Boolean, chart: BarChart, leftCount: Int = 2) {
 
         chart.setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
             private val onValueSelectedRectF = RectF()
@@ -470,7 +479,7 @@ class ReportMainActivity : AppCompatActivity() {
         xAxis.valueFormatter = xAxisFormatter
         xAxis.axisLineColor = UIUtils.getColor(R.color.bottom_line)
 
-        val custom = ScoreAxisValueFormat(true)
+        val custom = ScoreAxisValueFormat(hasScore)
 
         val leftAxis: YAxis = chart.axisLeft
         leftAxis.setLabelCount(leftCount, false)
@@ -610,21 +619,21 @@ class ReportMainActivity : AppCompatActivity() {
 
         if (count == 7) {
             weekData?.forEach {
-                timeList.add(it.usedTime)
+                timeList.add(it.usedTime/60)
                 knowledgeList.add(it.knowledgeNum)
                 questionList.add(it.questionNum)
                 videoList.add(it.videoNum)
             }
         } else if (count == 14) {
             monthData?.takeLast(14)?.forEach {
-                timeList.add(it.usedTime)
+                timeList.add(it.usedTime/60)
                 knowledgeList.add(it.knowledgeNum)
                 questionList.add(it.questionNum)
                 videoList.add(it.videoNum)
             }
         } else if (count == 30) {
             monthData?.forEach {
-                timeList.add(it.usedTime)
+                timeList.add(it.usedTime/60)
                 knowledgeList.add(it.knowledgeNum)
                 questionList.add(it.questionNum)
                 videoList.add(it.videoNum)
@@ -825,7 +834,7 @@ class ReportMainActivity : AppCompatActivity() {
         when (count) {
             7 -> {
                 weekData?.forEach {
-                    timeList.add(it.usedTime)
+                    timeList.add(it.usedTime/60)
                     knowledgeList.add(it.knowledgeNum)
                     questionList.add(it.questionNum)
                     videoList.add(it.videoNum)
@@ -833,7 +842,7 @@ class ReportMainActivity : AppCompatActivity() {
             }
             14 -> {
                 monthData?.takeLast(14)?.forEach {
-                    timeList.add(it.usedTime)
+                    timeList.add(it.usedTime/60)
                     knowledgeList.add(it.knowledgeNum)
                     questionList.add(it.questionNum)
                     videoList.add(it.videoNum)
@@ -841,7 +850,7 @@ class ReportMainActivity : AppCompatActivity() {
             }
             30 -> {
                 monthData?.forEach {
-                    timeList.add(it.usedTime)
+                    timeList.add(it.usedTime/60)
                     knowledgeList.add(it.knowledgeNum)
                     questionList.add(it.questionNum)
                     videoList.add(it.videoNum)
@@ -978,7 +987,7 @@ class ReportMainActivity : AppCompatActivity() {
                 override fun onError(e: Throwable) {
                     e.printStackTrace()
                     print("ddd ${e.message}")
-                    Log.e("ddd","${e.message}")
+                    Log.e("ddd", "${e.message}")
                 }
 
                 override fun onComplete() {
@@ -987,9 +996,9 @@ class ReportMainActivity : AppCompatActivity() {
             })
     }
 
-    private fun getKnowDataRemote() {
+    private fun getKnowDataRemote(subjectId: Int) {
         mMainRepository.jxwKnowledgeList(
-            subjectId = sSubjectId,
+            subjectId = subjectId,
             gradeId = sGradeId,
             editionId = sEditionId,
 //            deviceId = sDeviceId,
@@ -1030,7 +1039,7 @@ class ReportMainActivity : AppCompatActivity() {
                 override fun onError(e: Throwable) {
                     e.printStackTrace()
                     print("ddd ${e.message}")
-                    Log.e("ddd","${e.message}")
+                    Log.e("ddd", "${e.message}")
                 }
 
                 override fun onComplete() {
@@ -1067,5 +1076,197 @@ class ReportMainActivity : AppCompatActivity() {
             listHolder.setNestedScrollingEnabled(false);
             listHolder.setHasFixedSize(true)
         }
+    }
+
+    private var choseBook: Boolean = false
+
+    private fun getSelectLesson() {
+        Observable.create<LastSelectEntity> {
+            val selectEntity = getContentLesson()
+            if (selectEntity?.subjectId != null) {
+                it.onNext(selectEntity)
+            } else {
+                it.onError(Throwable("empty"))
+            }
+            it.onComplete()
+        }.subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(object : Observer<LastSelectEntity> {
+                override fun onSubscribe(d: Disposable) {
+
+                }
+
+                override fun onNext(t: LastSelectEntity) {
+                    currentSelectEntity = t
+                    choseBook = true
+                    currentSelectEntity?.subjectId?.toInt()?.let { getKnowDataRemote(it) }
+                    mBinding.tvTips.text = currentSelectEntity?.subjectName ?: "--"
+                }
+
+                override fun onError(e: Throwable) {
+                    choseBook = false
+                    getAllContent()
+                }
+
+                override fun onComplete() {
+
+                }
+
+            })
+    }
+
+    private fun getAllContent() {
+        Observable.create<MutableList<LastSelectEntity>> {
+            val selectEntity = getAllLesson()
+            if (selectEntity.isNotEmpty()) {
+                it.onNext(selectEntity)
+            } else {
+                it.onError(Throwable("empty"))
+            }
+            it.onComplete()
+        }.subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(object : Observer<MutableList<LastSelectEntity>> {
+                override fun onSubscribe(d: Disposable) {
+
+                }
+
+                override fun onNext(t: MutableList<LastSelectEntity>) {
+                    Log.e("dljjj","onNext ${t.size}")
+                    if (!choseBook) {
+                        currentSelectEntity = t.first()
+                        choseBook = true
+                        currentSelectEntity?.subjectId?.toInt()?.let { getKnowDataRemote(it) }
+                        mBinding.tvTips.text = currentSelectEntity?.subjectName ?: "--"
+
+                        lessonList.clear()
+                        lessonList.addAll(t)
+
+                        currentSelectEntity?.subjectId?.toInt()?.let { getKnowDataRemote(it) }
+                    }
+
+                }
+
+                override fun onError(e: Throwable) {
+                    Log.e("dljjj","onError ${e.message}")
+                    choseBook = false
+                }
+
+                override fun onComplete() {
+
+                }
+
+            })
+    }
+
+    private fun getContentLesson(): LastSelectEntity? {
+        val uri: Uri =
+            Uri.parse("content://com.jxw.question.LastSelectProvider/query_last_select_by_subject")
+        /*对应的科目*/
+        val selection = "语文"
+        val cursor: Cursor? = contentResolver.query(uri, null, selection, null, null)
+        var entity: LastSelectEntity? = null
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+                entity = LastSelectEntity()
+                val subjectIdIndex: Int = cursor.getColumnIndex("subjectId")
+                if (subjectIdIndex != -1) {
+                    val subjectId: String = cursor.getString(subjectIdIndex)
+                    Log.e("Test999", "日志输出------subjectId:$subjectId")
+                    entity.subjectId = subjectId
+                } else {
+                    choseBook = false
+                    //没有选中的
+                    break
+                }
+                val subjectNameIndex: Int = cursor.getColumnIndex("subjectName")
+                if (subjectNameIndex != -1) {
+                    val subjectName: String = cursor.getString(subjectNameIndex)
+                    Log.e("Test999", "日志输出------subjectName:$subjectName")
+                    entity.subjectName = subjectName
+                }
+                if (entity.subjectId != null) {
+                    break
+                }
+            }
+        }
+        return entity
+    }
+
+    private fun getAllLesson(): MutableList<LastSelectEntity> {
+        val list = mutableListOf<LastSelectEntity>()
+        val uri = Uri.parse("content://com.jxw.question.LastSelectProvider/query_last_select")
+        val cursor: Cursor? =
+            contentResolver.query(uri, null, null, null, null)
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+                val entity = LastSelectEntity()
+                val subjectIdIndex: Int = cursor.getColumnIndex("subjectId")
+                if (subjectIdIndex != -1) {
+                    val subjectId: String = cursor.getString(subjectIdIndex)
+                    Log.e("Test999", "日志输出2------subjectId:$subjectId")
+                    entity.subjectId = subjectId
+                }
+                val subjectNameIndex: Int = cursor.getColumnIndex("subjectName")
+                if (subjectNameIndex != -1) {
+                    val subjectName: String = cursor.getString(subjectNameIndex)
+                    Log.e("Test999", "日志输出2------subjectName:$subjectName")
+                    entity.subjectName = subjectName
+                }
+                list.add(entity)
+            }
+        }
+//        for (i in 0..10) {
+//            val entity1 = LastSelectEntity()
+//            entity1.subjectName = "语文$i"
+//            entity1.subjectId = "123123$i"
+//            list.add(entity1)
+//        }
+        return list
+    }
+
+//    private var courseDialog: BottomSheetDialog? = null
+//    private var switchAdapter: SubjectAdapter? = null
+//    private fun initSwitchCourse(list: MutableList<LastSelectEntity>) {
+//        val courseDialog = BottomSheetDialog(this@ReportMainActivity)
+//        val switchBinding = DataBindingUtil.inflate<SwitchCourseLayoutBinding>(
+//            layoutInflater,
+//            R.layout.switch_course_layout,
+//            null,
+//            false
+//        )
+//        courseDialog?.setContentView(switchBinding.root)
+//        switchBinding.listCourse.layoutManager = LinearLayoutManager(this)
+//        switchAdapter = SubjectAdapter(list, onItemClick = { data, index ->
+//            val old = switchAdapter?.selectIndex ?: 0
+//            switchAdapter?.selectIndex = index
+//            switchAdapter?.notifyItemChanged(old)
+//            switchAdapter?.notifyItemChanged(index)
+//        })
+//        val selectIndex = switchAdapter?.list?.indexOf(currentSelectEntity) ?: 0
+//        switchAdapter?.selectIndex = selectIndex
+//
+//        switchBinding.listCourse.adapter = switchAdapter
+//        switchBinding.tvSave.setOnClickListener {
+//            val index = switchAdapter?.selectIndex?:0
+//            if(index>=0 && index<list.size){
+//                currentSelectEntity = list[index]
+//            }
+//            currentSelectEntity?.subjectId?.toInt()?.let { it1 -> getKnowDataRemote(it1) }
+//            mBinding.tvTips.text = currentSelectEntity?.subjectName ?: "--"
+//            courseDialog?.dismiss()
+//        }
+//        courseDialog.show()
+//    }
+
+    private fun showSwitchDialog(list: MutableList<LastSelectEntity>) {
+        if(list.isEmpty()){
+            return
+        }
+        CourseDialog(this,list,currentSelectEntity){
+            currentSelectEntity= it
+            currentSelectEntity?.subjectId?.toInt()?.let { it1 -> getKnowDataRemote(it1) }
+            mBinding.tvTips.text = currentSelectEntity?.subjectName ?: "--"
+        }.show()
     }
 }

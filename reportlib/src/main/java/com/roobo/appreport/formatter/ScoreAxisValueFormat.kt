@@ -11,7 +11,7 @@ class ScoreAxisValueFormat(val hasScore:Boolean) :ValueFormatter() {
     override fun getFormattedValue(value: Float): String {
         Log.e("dlj======>"," $hasScore $value")
         if(hasScore) {
-            return "${mFormat.format(value / 60)} 分"
+            return "${mFormat.format(value)} 分"
         }else{
             return "${mFormat.format(value)}"
         }

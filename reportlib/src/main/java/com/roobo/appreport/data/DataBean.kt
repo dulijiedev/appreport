@@ -57,7 +57,7 @@ data class Knowledge(
     val knowledgeId: Int,
     val knowledgename: String,
     val noRecord: Boolean,
-    val accuracy:Int?
+    val accuracy: Int?
 ) : Parcelable
 
 
@@ -94,8 +94,36 @@ data class WeekDetail(
 @Poko
 @Parcelize
 data class SubjectInfo(
-    val subjectid:Int,
-    val subjectname:String,
-    val pinyin:String?,
-    val opentype:Int
+    val subjectid: Int,
+    val subjectname: String,
+    val pinyin: String?,
+    val opentype: Int
 ) : Parcelable
+
+class LastSelectEntity {
+    var uid = 0
+
+    /*科目*/
+    var subjectId: String? = null
+
+    /*科目*/
+    var subjectName: String? = null
+
+    /*年级*/
+    var gradeId: String? = null
+
+    /*年级*/
+    var gradeName: String? = null
+
+    /*出版社*/
+    var editionId: String? = null
+
+    /*出版社*/
+    var editionName: String? = null
+
+    /*章节*/
+    var chapterId: String? = null
+
+    /*章节*/
+    var chapterName: String? = null
+}
