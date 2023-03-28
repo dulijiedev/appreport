@@ -277,7 +277,6 @@ class ReportMainActivity : AppCompatActivity() {
             chartKnowledge.setPinchZoom(false)
             chartKnowledge.setDrawGridBackground(false)
             chartKnowledge.setGridBackgroundColor(UIUtils.getColor(R.color.column_color))
-
 //            initKnowledgeChart(chartKnowledge, leftCount = 5)
             //多组数据内容
 //            initKnowledgeData(chartKnowledge, 5)
@@ -322,7 +321,11 @@ class ReportMainActivity : AppCompatActivity() {
                     llUndetected.setBackgroundResource(R.drawable.border_selected_bkg)
                 }
             }
-            topData?.let { initKnowledgeData(chartKnowledge, it, knowledgeType = knowledgeType) }
+
+            topData?.let { initKnowledgeData(chartKnowledge, it, knowledgeType = knowledgeType) }?: kotlin.run {
+                chartKnowledge.clear()
+                mBinding.tvLessonName.text="--"
+            }
         }
 
     }
@@ -1013,10 +1016,11 @@ class ReportMainActivity : AppCompatActivity() {
 
                 override fun onNext(it: BaseResponse<TopData>) {
                     this@ReportMainActivity.topData = it.data
-                    mBinding.tvTotalKnowledge.text = "${it.data?.totalBookKnowledge}"
-                    mBinding.tvMasterNumber.text = "${it.data?.bookMasterNum}"
-                    mBinding.tvWeakNumber.text = "${it.data?.bookWeaknum}"
-                    mBinding.tvUnevaluatedNumber.text = "${it.data?.bookNotEvaluatedNum}"
+
+                    mBinding.tvTotalKnowledge.text = "${it.data?.totalBookKnowledge?:"--"}"
+                    mBinding.tvMasterNumber.text = "${it.data?.bookMasterNum?:"--"}"
+                    mBinding.tvWeakNumber.text = "${it.data?.bookWeaknum?:"--"}"
+                    mBinding.tvUnevaluatedNumber.text = "${it.data?.bookNotEvaluatedNum?:"--"}"
                     initKnowledgeChart(
                         mBinding.chartKnowledge,
                         leftCount = 4
@@ -1024,6 +1028,10 @@ class ReportMainActivity : AppCompatActivity() {
                     it.data?.apply {
                         //多组数据内容
                         initKnowledgeData(mBinding.chartKnowledge, this)
+                    }?: kotlin.run {
+                        mBinding.chartKnowledge.clear()
+                        switchKnowledgeChartBar(KnowledgeCharEnum.All)
+                        mBinding.tvLessonName.text="--"
                     }
 
                     val list = it.data?.chapterList?.map {
@@ -1172,7 +1180,7 @@ class ReportMainActivity : AppCompatActivity() {
         val uri: Uri =
             Uri.parse("content://com.jxw.question.LastSelectProvider/query_last_select_by_subject")
         /*对应的科目*/
-        val selection = "语文"
+        val selection = ""
         val cursor: Cursor? = contentResolver.query(uri, null, selection, null, null)
         var entity: LastSelectEntity? = null
         if (cursor != null) {
@@ -1182,6 +1190,9 @@ class ReportMainActivity : AppCompatActivity() {
                 if (subjectIdIndex != -1) {
                     val subjectId: String = cursor.getString(subjectIdIndex)
                     Log.e("Test999", "日志输出------subjectId:$subjectId")
+                    if(subjectId.isBlank()){
+                        continue
+                    }
                     entity.subjectId = subjectId
                 } else {
                     choseBook = false
@@ -1214,6 +1225,9 @@ class ReportMainActivity : AppCompatActivity() {
                 if (subjectIdIndex != -1) {
                     val subjectId: String = cursor.getString(subjectIdIndex)
                     Log.e("Test999", "日志输出2------subjectId:$subjectId")
+                    if(subjectId.isBlank()){
+                        continue
+                    }
                     entity.subjectId = subjectId
                 }
                 val subjectNameIndex: Int = cursor.getColumnIndex("subjectName")
@@ -1274,6 +1288,10 @@ class ReportMainActivity : AppCompatActivity() {
             return
         }
         CourseDialog(this,list,currentSelectEntity){
+            if(it?.subjectId?.isEmpty() == true){
+                Toast.makeText(this,"课程暂未添加",Toast.LENGTH_SHORT).show()
+                return@CourseDialog
+            }
             currentSelectEntity= it
             currentSelectEntity?.subjectId?.toInt()?.let { it1 -> getKnowDataRemote(it1) }
             mBinding.tvTips.text = currentSelectEntity?.subjectName ?: "--"

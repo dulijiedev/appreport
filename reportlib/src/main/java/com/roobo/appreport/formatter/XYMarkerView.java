@@ -84,9 +84,11 @@ public class XYMarkerView extends MarkerView {
                     for (int i = 0; i < ((BarEntry) e).getYVals().length; i++) {
                         total += ((BarEntry) e).getYVals()[i];
                     }
-                    tv2.setText("" + ((int) (((BarEntry) e).getYVals()[0])) + "");
-                    tv3.setText("" + ((int) (((BarEntry) e).getYVals()[1])) + "");
-                    tv4.setText("" + ((int) (((BarEntry) e).getYVals()[2])) + "");
+                    if(((BarEntry) e).getYVals().length == 3) {
+                        tv2.setText("" + ((int) (((BarEntry) e).getYVals()[0])) + "");
+                        tv3.setText("" + ((int) (((BarEntry) e).getYVals()[1])) + "");
+                        tv4.setText("" + ((int) (((BarEntry) e).getYVals()[2])) + "");
+                    }
                     tv5.setText("" + ((int) total));
                     ll2.setVisibility(View.VISIBLE);
                     ll3.setVisibility(View.VISIBLE);
