@@ -10,6 +10,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.widget.RadioButton
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
@@ -1099,6 +1100,10 @@ class ReportMainActivity : AppCompatActivity() {
                 override fun onNext(t: LastSelectEntity) {
                     currentSelectEntity = t
                     choseBook = true
+                    Log.e("dlj====","${currentSelectEntity?.subjectId}")
+                    if(currentSelectEntity?.subjectId?.isEmpty() == true){
+                        return
+                    }
                     currentSelectEntity?.subjectId?.toInt()?.let { getKnowDataRemote(it) }
                     mBinding.tvTips.text = currentSelectEntity?.subjectName ?: "--"
                 }
@@ -1135,6 +1140,10 @@ class ReportMainActivity : AppCompatActivity() {
                     Log.e("dljjj","onNext ${t.size}")
                     if (!choseBook) {
                         currentSelectEntity = t.first()
+                        Log.e("dljjj","sss ${currentSelectEntity?.subjectName } ${currentSelectEntity?.subjectId}")
+                        if(currentSelectEntity?.subjectId?.isEmpty() == true){
+                            return
+                        }
                         choseBook = true
                         currentSelectEntity?.subjectId?.toInt()?.let { getKnowDataRemote(it) }
                         mBinding.tvTips.text = currentSelectEntity?.subjectName ?: "--"
@@ -1261,6 +1270,7 @@ class ReportMainActivity : AppCompatActivity() {
 
     private fun showSwitchDialog(list: MutableList<LastSelectEntity>) {
         if(list.isEmpty()){
+            Toast.makeText(this,"课程为空",Toast.LENGTH_SHORT).show()
             return
         }
         CourseDialog(this,list,currentSelectEntity){
