@@ -55,7 +55,7 @@
                         android:layout_height="wrap_content"
 
                         android:layout_gravity="start|center_vertical"
-                        android:text="今日学习情况"
+                        android:text="每日学习情况"
                         android:textSize="15sp" />
 
                     <LinearLayout

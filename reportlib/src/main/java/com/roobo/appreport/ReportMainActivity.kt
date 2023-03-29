@@ -322,10 +322,11 @@ class ReportMainActivity : AppCompatActivity() {
                 }
             }
 
-            topData?.let { initKnowledgeData(chartKnowledge, it, knowledgeType = knowledgeType) }?: kotlin.run {
-                chartKnowledge.clear()
-                mBinding.tvLessonName.text="--"
-            }
+            topData?.let { initKnowledgeData(chartKnowledge, it, knowledgeType = knowledgeType) }
+                ?: kotlin.run {
+                    chartKnowledge.clear()
+                    mBinding.tvLessonName.text = "--"
+                }
         }
 
     }
@@ -623,21 +624,21 @@ class ReportMainActivity : AppCompatActivity() {
 
         if (count == 7) {
             weekData?.forEach {
-                timeList.add(it.usedTime/60)
+                timeList.add(it.usedTime / 60)
                 knowledgeList.add(it.knowledgeNum)
                 questionList.add(it.questionNum)
                 videoList.add(it.videoNum)
             }
         } else if (count == 14) {
             monthData?.takeLast(14)?.forEach {
-                timeList.add(it.usedTime/60)
+                timeList.add(it.usedTime / 60)
                 knowledgeList.add(it.knowledgeNum)
                 questionList.add(it.questionNum)
                 videoList.add(it.videoNum)
             }
         } else if (count == 30) {
             monthData?.forEach {
-                timeList.add(it.usedTime/60)
+                timeList.add(it.usedTime / 60)
                 knowledgeList.add(it.knowledgeNum)
                 questionList.add(it.questionNum)
                 videoList.add(it.videoNum)
@@ -838,7 +839,7 @@ class ReportMainActivity : AppCompatActivity() {
         when (count) {
             7 -> {
                 weekData?.forEach {
-                    timeList.add(it.usedTime/60)
+                    timeList.add(it.usedTime / 60)
                     knowledgeList.add(it.knowledgeNum)
                     questionList.add(it.questionNum)
                     videoList.add(it.videoNum)
@@ -846,7 +847,7 @@ class ReportMainActivity : AppCompatActivity() {
             }
             14 -> {
                 monthData?.takeLast(14)?.forEach {
-                    timeList.add(it.usedTime/60)
+                    timeList.add(it.usedTime / 60)
                     knowledgeList.add(it.knowledgeNum)
                     questionList.add(it.questionNum)
                     videoList.add(it.videoNum)
@@ -854,7 +855,7 @@ class ReportMainActivity : AppCompatActivity() {
             }
             30 -> {
                 monthData?.forEach {
-                    timeList.add(it.usedTime/60)
+                    timeList.add(it.usedTime / 60)
                     knowledgeList.add(it.knowledgeNum)
                     questionList.add(it.questionNum)
                     videoList.add(it.videoNum)
@@ -1000,11 +1001,11 @@ class ReportMainActivity : AppCompatActivity() {
             })
     }
 
-    private fun getKnowDataRemote(subjectId: Int) {
+    private fun getKnowDataRemote(currentSelectEntity: LastSelectEntity) {
         mMainRepository.jxwKnowledgeList(
-            subjectId = subjectId,
-            gradeId = sGradeId,
-            editionId = sEditionId,
+            subjectId = currentSelectEntity.subjectId?.toInt()?:0,
+            gradeId = currentSelectEntity.gradeId?.toInt()?:0,
+            editionId = currentSelectEntity.editionId?.toInt()?:0,
 //            deviceId = sDeviceId,
 //            token = sToken
         ).subscribeOn(Schedulers.io())
@@ -1017,10 +1018,10 @@ class ReportMainActivity : AppCompatActivity() {
                 override fun onNext(it: BaseResponse<TopData>) {
                     this@ReportMainActivity.topData = it.data
 
-                    mBinding.tvTotalKnowledge.text = "${it.data?.totalBookKnowledge?:"--"}"
-                    mBinding.tvMasterNumber.text = "${it.data?.bookMasterNum?:"--"}"
-                    mBinding.tvWeakNumber.text = "${it.data?.bookWeaknum?:"--"}"
-                    mBinding.tvUnevaluatedNumber.text = "${it.data?.bookNotEvaluatedNum?:"--"}"
+                    mBinding.tvTotalKnowledge.text = "${it.data?.totalBookKnowledge ?: "--"}"
+                    mBinding.tvMasterNumber.text = "${it.data?.bookMasterNum ?: "--"}"
+                    mBinding.tvWeakNumber.text = "${it.data?.bookWeaknum ?: "--"}"
+                    mBinding.tvUnevaluatedNumber.text = "${it.data?.bookNotEvaluatedNum ?: "--"}"
                     initKnowledgeChart(
                         mBinding.chartKnowledge,
                         leftCount = 4
@@ -1028,10 +1029,10 @@ class ReportMainActivity : AppCompatActivity() {
                     it.data?.apply {
                         //多组数据内容
                         initKnowledgeData(mBinding.chartKnowledge, this)
-                    }?: kotlin.run {
+                    } ?: kotlin.run {
                         mBinding.chartKnowledge.clear()
                         switchKnowledgeChartBar(KnowledgeCharEnum.All)
-                        mBinding.tvLessonName.text="--"
+                        mBinding.tvLessonName.text = "--"
                     }
 
                     val list = it.data?.chapterList?.map {
@@ -1108,12 +1109,12 @@ class ReportMainActivity : AppCompatActivity() {
                 override fun onNext(t: LastSelectEntity) {
                     currentSelectEntity = t
                     choseBook = true
-                    Log.e("dlj====","${currentSelectEntity?.subjectId}")
-                    if(currentSelectEntity?.subjectId?.isEmpty() == true){
+                    Log.e("dlj====", "${currentSelectEntity?.subjectId}")
+                    if (currentSelectEntity?.subjectId?.isEmpty() == true) {
                         return
                     }
-                    currentSelectEntity?.subjectId?.toInt()?.let { getKnowDataRemote(it) }
-                    mBinding.tvTips.text = currentSelectEntity?.subjectName ?: "--"
+                    currentSelectEntity?.let { getKnowDataRemote(it) }
+                    mBinding.tvTips.text ="${currentSelectEntity?.editionName?:""}${currentSelectEntity?.subjectName?:""}${currentSelectEntity?.gradeName?:""}"// currentSelectEntity?.subjectName ?: "--"
                 }
 
                 override fun onError(e: Throwable) {
@@ -1145,27 +1146,30 @@ class ReportMainActivity : AppCompatActivity() {
                 }
 
                 override fun onNext(t: MutableList<LastSelectEntity>) {
-                    Log.e("dljjj","onNext ${t.size}")
+                    Log.e("dljjj", "onNext ${t.size}")
                     if (!choseBook) {
                         currentSelectEntity = t.first()
-                        Log.e("dljjj","sss ${currentSelectEntity?.subjectName } ${currentSelectEntity?.subjectId}")
-                        if(currentSelectEntity?.subjectId?.isEmpty() == true){
+                        Log.e(
+                            "dljjj",
+                            "sss ${currentSelectEntity?.subjectName} ${currentSelectEntity?.subjectId}"
+                        )
+                        if (currentSelectEntity?.subjectId?.isEmpty() == true) {
                             return
                         }
                         choseBook = true
-                        currentSelectEntity?.subjectId?.toInt()?.let { getKnowDataRemote(it) }
-                        mBinding.tvTips.text = currentSelectEntity?.subjectName ?: "--"
+                        currentSelectEntity?.let { getKnowDataRemote(it) }
+                        mBinding.tvTips.text = "${currentSelectEntity?.editionName?:""}${currentSelectEntity?.subjectName?:""}${currentSelectEntity?.gradeName?:""}"//currentSelectEntity?.subjectName ?: "--"
 
                         lessonList.clear()
                         lessonList.addAll(t)
 
-                        currentSelectEntity?.subjectId?.toInt()?.let { getKnowDataRemote(it) }
+                        currentSelectEntity?.let { getKnowDataRemote(it) }
                     }
 
                 }
 
                 override fun onError(e: Throwable) {
-                    Log.e("dljjj","onError ${e.message}")
+                    Log.e("dljjj", "onError ${e.message}")
                     choseBook = false
                 }
 
@@ -1189,22 +1193,57 @@ class ReportMainActivity : AppCompatActivity() {
                 val subjectIdIndex: Int = cursor.getColumnIndex("subjectId")
                 if (subjectIdIndex != -1) {
                     val subjectId: String = cursor.getString(subjectIdIndex)
-                    Log.e("Test999", "日志输出------subjectId:$subjectId")
-                    if(subjectId.isBlank()){
+                    Log.e("Test999", "日志输出1------subjectId:$subjectId")
+                    if (subjectId.isBlank()) {
                         continue
                     }
                     entity.subjectId = subjectId
                 } else {
                     choseBook = false
                     //没有选中的
-                    break
+//                    break
                 }
                 val subjectNameIndex: Int = cursor.getColumnIndex("subjectName")
                 if (subjectNameIndex != -1) {
                     val subjectName: String = cursor.getString(subjectNameIndex)
-                    Log.e("Test999", "日志输出------subjectName:$subjectName")
+                    Log.e("Test999", "日志输出2------subjectName:$subjectName")
                     entity.subjectName = subjectName
                 }
+
+                val gradeIdIndex: Int = cursor.getColumnIndex("gradeId")
+                if (gradeIdIndex != -1) {
+                    val gradeId: String = cursor.getString(gradeIdIndex)
+                    Log.e("Test999", "日志输出3------gradeId:$gradeId")
+                }
+                val gradeNameIndex: Int = cursor.getColumnIndex("gradeName")
+                if (gradeNameIndex != -1) {
+                    val gradeName: String = cursor.getString(gradeNameIndex)
+                    Log.e("Test999", "日志输出4------gradeName:$gradeName")
+                }
+                val editionIdIndex: Int = cursor.getColumnIndex("editionId")
+                if (editionIdIndex != -1) {
+                    val editionId: String = cursor.getString(editionIdIndex)
+                    Log.e("Test999", "日志输出5------editionId:$editionId")
+                }
+                val editionNameIndex: Int = cursor.getColumnIndex("editionName")
+                if (editionNameIndex != -1) {
+                    val editionName: String = cursor.getString(editionNameIndex)
+                    Log.e("Test999", "日志输出6------editionName:$editionName")
+                }
+
+
+                val chapterIdIndex: Int = cursor.getColumnIndex("chapterId")
+                if (editionNameIndex != -1) {
+                    val chapterId: String = cursor.getString(chapterIdIndex)
+                    Log.e("Test999", "日志输出7------chapterId:$chapterId")
+                }
+
+                val chapterNameIndex: Int = cursor.getColumnIndex("chapterName")
+                if (chapterNameIndex != -1) {
+                    val chapterName: String = cursor.getString(chapterNameIndex)
+                    Log.e("Test999", "日志输出8------chapterName:$chapterName")
+                }
+
                 if (entity.subjectId != null) {
                     break
                 }
@@ -1225,7 +1264,7 @@ class ReportMainActivity : AppCompatActivity() {
                 if (subjectIdIndex != -1) {
                     val subjectId: String = cursor.getString(subjectIdIndex)
                     Log.e("Test999", "日志输出2------subjectId:$subjectId")
-                    if(subjectId.isBlank()){
+                    if (subjectId.isBlank()) {
                         continue
                     }
                     entity.subjectId = subjectId
@@ -1235,6 +1274,46 @@ class ReportMainActivity : AppCompatActivity() {
                     val subjectName: String = cursor.getString(subjectNameIndex)
                     Log.e("Test999", "日志输出2------subjectName:$subjectName")
                     entity.subjectName = subjectName
+                }
+
+                val gradeIdIndex: Int = cursor.getColumnIndex("gradeId")
+                if (gradeIdIndex != -1) {
+                    val gradeId: String = cursor.getString(gradeIdIndex)
+                    Log.e("Test999", "日志输出3------gradeId:$gradeId")
+                    entity.gradeId = gradeId
+                }
+                val gradeNameIndex: Int = cursor.getColumnIndex("gradeName")
+                if (gradeNameIndex != -1) {
+                    val gradeName: String = cursor.getString(gradeNameIndex)
+                    Log.e("Test999", "日志输出4------gradeName:$gradeName")
+                    entity.gradeName = gradeName
+                }
+                val editionIdIndex: Int = cursor.getColumnIndex("editionId")
+                if (editionIdIndex != -1) {
+                    val editionId: String = cursor.getString(editionIdIndex)
+                    Log.e("Test999", "日志输出5------editionId:$editionId")
+                    entity.editionId = editionId
+                }
+                val editionNameIndex: Int = cursor.getColumnIndex("editionName")
+                if (editionNameIndex != -1) {
+                    val editionName: String = cursor.getString(editionNameIndex)
+                    Log.e("Test999", "日志输出6------editionName:$editionName")
+                    entity.editionName = editionName
+                }
+
+
+                val chapterIdIndex: Int = cursor.getColumnIndex("chapterId")
+                if (chapterIdIndex != -1) {
+                    val chapterId: String = cursor.getString(chapterIdIndex)
+                    Log.e("Test999", "日志输出7------chapterId:$chapterId")
+                    entity.chapterId = chapterId
+                }
+
+                val chapterNameIndex: Int = cursor.getColumnIndex("chapterName")
+                if (chapterNameIndex != -1) {
+                    val chapterName: String = cursor.getString(chapterNameIndex)
+                    Log.e("Test999", "日志输出8------chapterName:$chapterName")
+                    entity.chapterName = chapterName
                 }
                 list.add(entity)
             }
@@ -1283,18 +1362,18 @@ class ReportMainActivity : AppCompatActivity() {
 //    }
 
     private fun showSwitchDialog(list: MutableList<LastSelectEntity>) {
-        if(list.isEmpty()){
-            Toast.makeText(this,"课程为空",Toast.LENGTH_SHORT).show()
+        if (list.isEmpty()) {
+            Toast.makeText(this, "课程为空", Toast.LENGTH_SHORT).show()
             return
         }
-        CourseDialog(this,list,currentSelectEntity){
-            if(it?.subjectId?.isEmpty() == true){
-                Toast.makeText(this,"课程暂未添加",Toast.LENGTH_SHORT).show()
+        CourseDialog(this, list, currentSelectEntity) {
+            if (it?.subjectId?.isEmpty() == true) {
+                Toast.makeText(this, "课程暂未添加", Toast.LENGTH_SHORT).show()
                 return@CourseDialog
             }
-            currentSelectEntity= it
-            currentSelectEntity?.subjectId?.toInt()?.let { it1 -> getKnowDataRemote(it1) }
-            mBinding.tvTips.text = currentSelectEntity?.subjectName ?: "--"
+            currentSelectEntity = it
+            currentSelectEntity?.let { it1 -> getKnowDataRemote(it1) }
+            mBinding.tvTips.text = "${currentSelectEntity?.editionName?:""}${currentSelectEntity?.subjectName?:""}${currentSelectEntity?.gradeName?:""}"//currentSelectEntity?.subjectName ?: "--"
         }.show()
     }
 }

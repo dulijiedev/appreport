@@ -28,7 +28,7 @@ class SubjectAdapter(val list: MutableList<LastSelectEntity>,var selectIndex:Int
     }
 
     override fun onBindViewHolder(holder: SubjectViewHolder, position: Int) {
-        holder.tvTips.text=list[position].subjectName?:""
+        holder.tvTips.text="${list[position].editionName?:""}${list[position].subjectName?:""}${list[position].gradeName?:""}" //list[position].editionName?:""+ list[position].subjectName?:""+list[position].gradeName+"(${list[position].editionName})"
         if(selectIndex == position){
             holder.tvTips.setTextColor(UIUtils.getColor(R.color.tab_indicator_color))
         }else{

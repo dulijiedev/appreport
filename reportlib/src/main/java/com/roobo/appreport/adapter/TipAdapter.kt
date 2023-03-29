@@ -39,7 +39,7 @@ class TipAdapter : RecyclerView.Adapter<TipAdapter.TipViewHolder>() {
         val lpm= holder.tvTips.layoutParams as RecyclerView.LayoutParams
         if(!datas.isNullOrEmpty()) {
             lpm.width = (ScreenUtil.getWith(ReportSDK.getInstance().application) - (50 + 35+(datas?.size?:0)*10).toPx()).div(datas?.size?:1)
-            lpm.marginStart=(8-(datas?.size?:0))* (6.toPx())
+            lpm.marginStart=(6.toPx())
             holder.tvTips.layoutParams = lpm
         }
     }
