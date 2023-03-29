@@ -33,15 +33,11 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.gyf.immersionbar.BarHide
 import com.gyf.immersionbar.ImmersionBar
 import com.roobo.appreport.adapter.HolderAdapter
-import com.roobo.appreport.adapter.SubjectAdapter
 import com.roobo.appreport.adapter.TipAdapter
 import com.roobo.appreport.data.*
 import com.roobo.appreport.databinding.ActivityMainReportBinding
-import com.roobo.appreport.databinding.SwitchCourseLayoutBinding
 import com.roobo.appreport.formatter.*
 import com.roobo.appreport.networklibrary.base.BaseResponse
-import com.roobo.appreport.networklibrary.sEditionId
-import com.roobo.appreport.networklibrary.sGradeId
 import com.roobo.appreport.networklibrary.sToken
 import com.roobo.appreport.repository.MainRepository
 import com.roobo.appreport.utils.UIUtils
@@ -69,8 +65,6 @@ class ReportMainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main_report)
-        sGradeId = intent.getIntExtra("gradeId", -1)
-        sEditionId = intent.getIntExtra("editionId", -1)
         sToken = intent.getStringExtra("token") ?: ""
 
         initBar()
